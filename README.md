@@ -1,4 +1,4 @@
-# WANDB DEMO
+# Wandb Demo
 
 This is a toy project to demonstrate the functionalities of WandB.
 
