@@ -78,7 +78,7 @@ def test(args, model, device, test_loader):
 
 
 def main():
-
+    
     # Workaround torchvision bug
     # https://github.com/pytorch/vision/issues/1938
     from six.moves import urllib
@@ -86,7 +86,6 @@ def main():
     opener.addheaders = [('User-agent', 'Mozilla/5.0')]
     urllib.request.install_opener(opener)
     os.makedirs("checkpoints", exist_ok=True)
-
 
     # Training settings
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -116,9 +115,10 @@ def main():
 
     kwargs = {'num_workers': 1, 'pin_memory': True} if use_cuda else {}
 
+    #Initializing wandb run
     run = wandb.init(entity='gigl', project='mnist_wandb', job_type='training')
     run.config.update(args)
-    #Downloading the dataset
+    #Downloading the dataset from wandb
     artifact_dir = run.use_artifact('gigl/mnist_wandb/mnist:latest', type='dataset').download()
 
     train_loader = torch.utils.data.DataLoader(
@@ -138,7 +138,8 @@ def main():
     model = Net().to(device)
     optimizer = optim.SGD(model.parameters(), lr=args.lr,
                           momentum=args.momentum)
-    wandb.watch(model)
+    #Watching the model in WandB
+    wandb.watch(model, log_graph=True)
 
     best_accuracy = -1
     for epoch in range(1, args.epochs + 1):
@@ -152,7 +153,7 @@ def main():
             'loss': test_loss}, 
 	        'checkpoints/model.ckpt')
             #Uploading the model artifact to wandb
-            artifact = wandb.Artifact('model', type='fully_connected_nn')
+            artifact = wandb.Artifact('fully_connected_nn', type='model')
             artifact.add_file('checkpoints/model.ckpt')
             artifact.metadata = {
                 "author": "Akshai",
